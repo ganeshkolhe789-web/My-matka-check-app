@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>180 Day FORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:0}
+body{background:#070b14;font-family:'Rajdhani',sans-serif;display:flex;justify-content:center;min-height:100vh}
+input,button{outline:none;font-family:'Rajdhani',sans-serif}
+button{cursor:pointer}
+#app{width:100%;max-width:430px;padding-bottom:90px;position:relative}
+
+/* ANIMATIONS */
+@keyframes popUp{0%{opacity:0;transform:translateX(-50%) translateY(4px)}20%{opacity:1;transform:translateX(-50%) translateY(-18px)}80%{opacity:1;transform:translateX(-50%) translateY(-20px)}100%{opacity:0;transform:translateX(-50%) translateY(-32px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+
+.tab-content{animation:fadeUp .3s ease}
+
+/* INTERACTIVE */
+.hrow{transition:transform .12s,background .12s;cursor:pointer}
+.hrow:active{transform:scale(.97)}
+.btn{transition:transform .12s,opacity .12s}
+.btn:active{transform:scale(.95);opacity:.85}
+
+/* POPUP TOAST */
+#popup{position:fixed;top:110px;left:50%;z-index:999;pointer-events:none;
+  background:#ffd70022;border:1px solid #ffd70066;border-radius:24px;
+  padding:8px 22px;white-space:nowrap;display:none}
+#popup span{color:#ffd700;font-weight:900;font-size:16px;font-family:'Orbitron',monospace}
+#popup.show{display:block;animation:popUp 1.8s ease forwards}
+
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:#000000cc;z-index:200;
+  display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+.modal-box{background:#0d0d1a;border:2px solid #ff444466;border-radius:24px;
+  padding:28px;width:100%;max-width:320px;text-align:center}
+
+/* BOTTOM NAV */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;z-index:100}
+#bottom-nav-inner{width:100%;max-width:430px;background:#0d1020ee;
+  backdrop-filter:blur(20px);border-top:1px solid #ffffff0d;
+  display:flex;padding:10px 14px 14px;gap:4px}
+.nav-btn{flex:1;padding:8px 4px;border-radius:12px;border:none;background:transparent;
+  display:flex;flex-direction:column;align-items:center;gap:2px;transition:background .2s}
+.nav-btn.active{background:#ffffff12}
+.nav-btn .nav-icon{font-size:18px}
+.nav-btn .nav-label{font-size:9px;font-family:'Orbitron',monospace;letter-spacing:1px;color:#ffffff33}
+.nav-btn.active .nav-label{color:#fff}
+
+/* TOP TABS */
+.top-tab{flex:1;padding:10px 2px;border-radius:12px;font-size:10px;font-weight:800;
+  font-family:'Orbitron',monospace;letter-spacing:.5px;background:transparent;
+  border:1.5px solid transparent;color:#ffffff44;transition:all .2s}
+.top-tab.active{background:#ffffff14;border-color:#ffffff22;color:#fff}
+
+/* HABIT ROW */
+.habit-row{display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-radius:14px;border:1.5px solid #ffffff12;background:#ffffff08;
+  margin-bottom:6px;cursor:pointer;transition:all .15s}
+.habit-row.done{border-color:var(--cat-color, #ffffff55)!important;
+  background:color-mix(in srgb,var(--cat-color,#fff) 10%,transparent)!important}
+.habit-row .chk{width:26px;height:26px;border-radius:8px;border:2px solid #ffffff22;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:14px;font-weight:900;transition:all .2s;flex-shrink:0;background:#ffffff0d}
+.habit-row.done .chk{border:none;color:#fff}
+
+/* PROGRESS BAR BASE */
+.bar-track{background:#ffffff10;border-radius:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:8px;transition:width .5s ease}
+
+/* CARD */
+.card{background:#ffffff08;border:1px solid #ffffff10;border-radius:16px;padding:14px 16px;margin-bottom:10px}
+
+/* BG GLOWS */
+#glow1{position:fixed;top:-80px;left:-60px;width:280px;height:280px;border-radius:50%;
+  background:#ff444406;filter:blur(70px);pointer-events:none;z-index:0}
+#glow2{position:fixed;bottom:100px;right:-50px;width:220px;height:220px;border-radius:50%;
+  background:#00e5ff05;filter:blur(60px);pointer-events:none;z-index:0}
+
+/* SEGMENT TOGGLE */
+.seg-wrap{display:flex;background:#ffffff0a;border-radius:12px;padding:4px;gap:4px;margin-bottom:12px}
+.seg-btn{flex:1;padding:10px 4px;border-radius:9px;border:none;font-weight:800;
+  font-size:13px;font-family:'Orbitron',monospace;background:transparent;
+  color:#ffffff33;transition:all .2s}
+.seg-btn.active-save{background:#00e54422;color:#00e544;box-shadow:0 0 12px #00e54433;outline:1.5px solid #00e54455}
+.seg-btn.active-kharch{background:#ff444422;color:#ff4444;box-shadow:0 0 12px #ff444433;outline:1.5px solid #ff444455}
+</style>
+</head>
+<body>
+
+<!-- BG GLOWS -->
+<div id="glow1"></div>
+<div id="glow2"></div>
+
+<!-- TOAST POPUP -->
+<div id="popup"><span id="popup-text"></span></div>
+
+<!-- CRAVING MODAL -->
+<div class="modal-bg" id="craving-modal" onclick="closeCraving()">
+  <div style="background:#0d0d1a;border:2px solid #ff444466;border-radius:24px;padding:28px;width:100%;max-width:340px;text-align:center" onclick="event.stopPropagation()">
+    <div style="font-size:42px;margin-bottom:4px">🧘</div>
+    <div style="color:#fff;font-size:17px;font-weight:800;font-family:'Orbitron',monospace;margin-bottom:4px">CRAVING TIMER</div>
+    <div style="color:#ffffff66;font-size:12px;margin-bottom:18px">10 minute thamba — craving niGhun jaate</div>
+    <div style="position:relative;width:130px;height:130px;margin:0 auto 18px">
+      <svg width="130" height="130" style="transform:rotate(-90deg)">
+        <circle cx="65" cy="65" r="54" fill="none" stroke="#ffffff10" stroke-width="7"/>
+        <circle id="craving-arc" cx="65" cy="65" r="54" fill="none" stroke="#ff4444" stroke-width="7"
+          stroke-dasharray="340" stroke-dashoffset="340" stroke-linecap="round"
+          style="filter:drop-shadow(0 0 8px #ff4444);transition:stroke-dashoffset 1s linear"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <div id="craving-time" style="color:#fff;font-size:28px;font-weight:900;font-family:'Orbitron',monospace">10:00</div>
+      </div>
+    </div>
+    <div id="craving-msg" style="color:#ffffff55;font-size:12px;margin-bottom:14px">"10 min pass zale ki safe aahe"</div>
+    <div style="display:flex;gap:10px">
+      <button id="craving-start-btn" class="btn" onclick="toggleCraving()" style="flex:1;padding:12px;border-radius:12px;background:#ff444433;border:2px solid #ff4444;color:#ff4444;font-weight:800;font-family:'Orbitron',monospace;font-size:13px">START</button>
+      <button class="btn" onclick="closeCraving()" style="flex:1;padding:12px;border-radius:12px;background:#ffffff0d;border:1px solid #ffffff22;color:#ffffff88;font-weight:700;font-size:13px">BAND KAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELAPSE MODAL -->
+<div class="modal-bg" id="relapse-modal" onclick="closeRelapse()">
+  <div style="background:#0d0d1a;border:2px solid #ff444466;border-radius:24px;padding:28px;max-width:320px;width:100%;text-align:center" onclick="event.stopPropagation()">
+    <div style="font-size:44px;margin-bottom:8px">😔</div>
+    <div style="color:#ff4444;font-size:17px;font-weight:900;font-family:'Orbitron',monospace;margin-bottom:8px">RELAPSE?</div>
+    <div style="color:#ffffff88;font-size:13px;margin-bottom:22px;line-height:1.7">Chuk hote — manushpan aahe.<br/>Udya fresh start. Streak reset hoil.</div>
+    <button class="btn" onclick="markRelapse()" style="width:100%;padding:14px;border-radius:14px;margin-bottom:10px;background:#ff444422;border:2px solid #ff4444;color:#ff4444;font-weight:800;font-size:15px;font-family:'Orbitron',monospace">HO, RESET KAR</button>
+    <button class="btn" onclick="closeRelapse()" style="width:100%;padding:14px;border-radius:14px;background:#ffffff0d;border:1px solid #ffffff22;color:#ffffff88;font-weight:700;font-size:14px">NAHI — MI CLEAN AAHE</button>
+  </div>
+</div>
+
+<!-- MILESTONE MODAL -->
+<div class="modal-bg" id="milestone-modal" onclick="closeMilestone()">
+  <div style="background:linear-gradient(135deg,#1a1200,#0d1a0d);border:2px solid #ffd70066;border-radius:28px;padding:36px;max-width:320px;width:100%;text-align:center;animation:slideIn .3s ease" onclick="event.stopPropagation()">
+    <div id="ms-icon" style="font-size:64px;margin-bottom:10px">🔥</div>
+    <div id="ms-label" style="color:#ffd700;font-size:20px;font-weight:900;font-family:'Orbitron',monospace;margin-bottom:8px"></div>
+    <div id="ms-reward" style="color:#ffffff88;font-size:14px;margin-bottom:24px;line-height:1.7"></div>
+    <button class="btn" onclick="closeMilestone()" style="width:100%;padding:14px;border-radius:14px;background:#ffd70022;border:2px solid #ffd70066;color:#ffd700;font-weight:800;font-size:15px;font-family:'Orbitron',monospace">💪 PUDHE JAA</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div style="padding:14px 18px 10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <div style="color:#ffffff33;font-size:9px;letter-spacing:4px;font-family:'Orbitron',monospace">PERSONAL</div>
+        <div style="color:#fff;font-size:20px;font-weight:900;letter-spacing:1px;font-family:'Orbitron',monospace;line-height:1.15">
+          180 DAY<br/><span style="color:#ff4444">FORGE</span>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:#ffffff33;font-size:9px;letter-spacing:3px;font-family:'Orbitron',monospace">AAJ DIN</div>
+        <div id="day-num" style="color:#00e5ff;font-size:44px;font-weight:900;font-family:'Orbitron',monospace;line-height:1;text-shadow:0 0 20px #00e5ff88">1</div>
+        <div style="color:#ffffff33;font-size:11px;font-family:'Orbitron',monospace">/ 180</div>
+      </div>
+    </div>
+    <!-- Live clock -->
+    <div style="background:#ffffff08;border:1px solid #ffffff0f;border-radius:12px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+      <div id="live-date" style="color:#ffffff66;font-size:12px;font-weight:600"></div>
+      <div id="live-time" style="color:#00e5ff;font-size:14px;font-weight:900;font-family:'Orbitron',monospace;letter-spacing:1px"></div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE BAR -->
+  <div style="margin:0 14px 10px;background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:10px 14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace">CHALLENGE</span>
+      <span id="challenge-pct-txt" style="color:#00e5ff;font-weight:800;font-size:11px;font-family:'Orbitron',monospace">0%</span>
+    </div>
+    <div class="bar-track" style="height:7px">
+      <div id="challenge-bar" class="bar-fill" style="height:7px;background:linear-gradient(90deg,#00e5ff,#cc44ff);box-shadow:0 0 8px #00e5ff55;width:0%"></div>
+    </div>
+  </div>
+
+  <!-- XP / LEVEL BAR -->
+  <div style="margin:0 14px 10px;background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:10px 14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span id="lvl-badge" style="font-size:18px">🌱</span>
+        <span id="lvl-name" style="font-weight:800;font-size:14px;font-family:'Orbitron',monospace;color:#aaaaaa">Navin</span>
+      </div>
+      <span id="xp-total" style="color:#ffd700;font-weight:800;font-size:12px;font-family:'Orbitron',monospace">0 XP</span>
+    </div>
+    <div class="bar-track" style="height:6px">
+      <div id="xp-bar" class="bar-fill" style="height:6px;width:0%"></div>
+    </div>
+    <div id="xp-pct-txt" style="color:#ffffff33;font-size:10px;margin-top:4px;font-family:'Orbitron',monospace">0% to next level</div>
+  </div>
+
+  <!-- TOP TABS -->
+  <div style="display:flex;gap:6px;padding:0 14px;margin-bottom:12px">
+    <button class="top-tab active btn" id="tab-today"   onclick="switchTab('today')">📋 AAJ</button>
+    <button class="top-tab btn"        id="tab-money"   onclick="switchTab('money')">💰 PAISA</button>
+    <button class="top-tab btn"        id="tab-stats"   onclick="switchTab('stats')">📊 STATS</button>
+    <button class="top-tab btn"        id="tab-settings" onclick="switchTab('settings')">⚙️ MORE</button>
+  </div>
+
+  <!-- TAB CONTENTS -->
+  <div id="content-today" class="tab-content"></div>
+  <div id="content-money" class="tab-content" style="display:none"></div>
+  <div id="content-stats" class="tab-content" style="display:none"></div>
+  <div id="content-settings" class="tab-content" style="display:none"></div>
+
+</div><!-- end #app -->
+
+<!-- BOTTOM NAV -->
+<div id="bottom-nav">
+  <div id="bottom-nav-inner">
+    <button class="nav-btn btn active" onclick="switchTab('today')" id="nav-today">
+      <span class="nav-icon">📋</span><span class="nav-label">AAJ</span>
+    </button>
+    <button class="nav-btn btn" onclick="switchTab('money')" id="nav-money">
+      <span class="nav-icon">💰</span><span class="nav-label">PAISA</span>
+    </button>
+    <button class="nav-btn btn" onclick="switchTab('stats')" id="nav-stats">
+      <span class="nav-icon">📊</span><span class="nav-label">STATS</span>
+    </button>
+    <button class="nav-btn btn" onclick="switchTab('settings')" id="nav-settings">
+      <span class="nav-icon">⚙️</span><span class="nav-label">MORE</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ──
+const CHALLENGE_START = "2026-04-18";
+const TOTAL_DAYS = 180;
+const FULL_DAY_BONUS = 120;
+const MONEY_GOAL = 10000;
+const STORE_KEY = "forge180_v6";
+
+const DEFAULT_HABITS = [
+  { id:"no_weed",    name:"No Weed Aaj",          icon:"🚫", xp:150, cat:"addiction", fixed:true },
+  { id:"no_alcohol", name:"No Alcohol Aaj",        icon:"🍺", xp:150, cat:"addiction", fixed:true },
+  { id:"meal3",      name:"3 Vela Jevan Khalle",   icon:"🍽️", xp:80,  cat:"diet" },
+  { id:"protein",    name:"Protein Khalla",         icon:"🥚", xp:60,  cat:"diet" },
+  { id:"water",      name:"3L Paani Pyalla",        icon:"💧", xp:40,  cat:"diet" },
+  { id:"work",       name:"Kaam la Gelo",           icon:"🧱", xp:100, cat:"fitness" },
+  { id:"pushups",    name:"20 Pushups Kele",        icon:"💪", xp:60,  cat:"fitness" },
+  { id:"sleep",      name:"10 la Zoplo",            icon:"😴", xp:50,  cat:"fitness" },
+  { id:"wife",       name:"Family la Veli Dili",    icon:"❤️", xp:80,  cat:"mind" },
+  { id:"nomood",     name:"Meditation 15 Min",      icon:"🧘", xp:80,  cat:"mind" },
+];
+
+const CATS = {
+  addiction:{ label:"🚫 ADDICTION FREE", color:"#ff4444" },
+  diet:     { label:"🍽️ JEVAN & HEALTH",  color:"#ff8c00" },
+  fitness:  { label:"💪 KAAM & FITNESS",  color:"#00e5ff" },
+  mind:     { label:"🧠 MANN & GHAR",     color:"#cc44ff" },
+  custom:   { label:"⭐ CUSTOM",          color:"#ffd700" },
+};
+
+const LEVELS = [
+  { min:0,    name:"Navin",    color:"#aaaaaa", badge:"🌱", desc:"Navi shuruaat" },
+  { min:300,  name:"Warrior",  color:"#00e5ff", badge:"⚡", desc:"Ladhayla tayyar" },
+  { min:800,  name:"Fighter",  color:"#ff8c00", badge:"🔥", desc:"Aag aahe aat" },
+  { min:1800, name:"Champion", color:"#ffd700", badge:"🏆", desc:"Jinknar tu" },
+  { min:3500, name:"Legend",   color:"#cc44ff", badge:"👑", desc:"Tu hi legend aahe" },
+];
+
+const MILESTONES = [
+  { day:3,   label:"3 Din Clean!",       icon:"🔥", reward:"Warrior badge unlock!" },
+  { day:7,   label:"1 Aathvda!",         icon:"💪", reward:"7 din sober — tu strong aahe!" },
+  { day:14,  label:"2 Aathvde!",         icon:"⚡", reward:"14 din — body heal hoti aahe!" },
+  { day:30,  label:"1 Mahina!",          icon:"🏆", reward:"30 din — Champion level!" },
+  { day:60,  label:"2 Mahine!",          icon:"👑", reward:"60 din — tu Legend banto aahe!" },
+  { day:90,  label:"90 Din — Half Way!", icon:"🌟", reward:"Ardha challenge complete! 🎯" },
+  { day:180, label:"180 Din — LEGEND!",  icon:"🎯", reward:"TU LEGEND ZHALA! 180 DIN!" },
+];
+
+const QUOTES = [
+  "Ek din, ek step. Aaj fakt aaj.",
+  "Tujhya baykocha vishwas tod nako.",
+  "Nesha sodla ki sab milto.",
+  "Tu 31 la jaag. Pude regret nako.",
+  "Mistry kaam karto tu — swatahla pan fix kar.",
+  "Craving yeil — pass hoil. Tu 180 din.",
+  "Aaj clean rahila ki kal strong astos.",
+  "Ek ek din build hoto — aaj cha din waste nako.",
+];
+
+// ── STORAGE ──
+function loadStore(){
+  try{ const r=localStorage.getItem(STORE_KEY); if(r) return JSON.parse(r); }catch(e){}
+  return { days:{}, totalXP:0, customHabits:[], moneySavings:[] };
+}
+function saveStore(){ try{ localStorage.setItem(STORE_KEY,JSON.stringify(store)); }catch(e){} }
+
+let store = loadStore();
+
+// ── HELPERS ──
+function todayISO(){ return new Date().toISOString().split("T")[0]; }
+function dayNumber(iso){
+  const diff = Math.floor((new Date(iso)-new Date(CHALLENGE_START))/86400000);
+  return Math.max(1,Math.min(diff+1,TOTAL_DAYS));
+}
+function calcStreak(){
+  const today=todayISO(); let streak=0;
+  const cur=new Date(today);
+  for(let i=0;i<TOTAL_DAYS;i++){
+    const iso=cur.toISOString().split("T")[0];
+    const d=store.days[iso];
+    const clean=d&&!d.relapsed&&(d.completed||[]).includes("no_weed")&&(d.completed||[]).includes("no_alcohol");
+    if(!clean){ if(iso===today){cur.setDate(cur.getDate()-1);continue;} break; }
+    streak++; cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+function getLevel(xp){ let l=LEVELS[0]; for(const x of LEVELS){if(xp>=x.min)l=x;} return l; }
+function getLvlPct(xp){
+  const idx=LEVELS.findIndex(l=>l===getLevel(xp));
+  if(idx>=LEVELS.length-1)return 100;
+  return Math.round(((xp-LEVELS[idx].min)/(LEVELS[idx+1].min-LEVELS[idx].min))*100);
+}
+function thisMonthISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; }
+function allHabits(){ return [...DEFAULT_HABITS,...(store.customHabits||[]).map(h=>({...h,cat:"custom",xp:60}))]; }
+function todayData(){ return store.days[todayISO()]||{completed:[],relapsed:false}; }
+
+// ── CURRENT TAB ──
+let currentTab = "today";
+let moneyType = "save";
+
+// ── FLASH TOAST ──
+let popTimer=null;
+function flash(msg){
+  const el=document.getElementById("popup");
+  const tx=document.getElementById("popup-text");
+  tx.textContent=msg;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  clearTimeout(popTimer);
+  popTimer=setTimeout(()=>el.classList.remove("show"),1800);
+}
+
+// ── LIVE CLOCK ──
+function updateClock(){
+  const now=new Date();
+  document.getElementById("live-time").textContent=now.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true});
+  document.getElementById("live-date").textContent=now.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── CRAVING TIMER ──
+let cravingSec=600, cravingRunning=false, cravingIv=null;
+function openCraving(){
+  document.getElementById("craving-modal").classList.add("show");
+}
+function closeCraving(){
+  document.getElementById("craving-modal").classList.remove("show");
+  cravingRunning=false; clearInterval(cravingIv);
+}
+function toggleCraving(){
+  if(cravingSec===0){cravingSec=600; updateCravingUI(); return;}
+  cravingRunning=!cravingRunning;
+  if(cravingRunning){
+    cravingIv=setInterval(()=>{
+      cravingSec--;
+      updateCravingUI();
+      if(cravingSec<=0){clearInterval(cravingIv);cravingRunning=false;}
+    },1000);
+  } else { clearInterval(cravingIv); }
+  document.getElementById("craving-start-btn").textContent=cravingRunning?"PAUSE":"RESUME";
+}
+function updateCravingUI(){
+  const mm=String(Math.floor(cravingSec/60)).padStart(2,"0");
+  const ss=String(cravingSec%60).padStart(2,"0");
+  const done=cravingSec===0;
+  const pct=((600-cravingSec)/600)*100;
+  const arc=document.getElementById("craving-arc");
+  const timeEl=document.getElementById("craving-time");
+  const msgEl=document.getElementById("craving-msg");
+  const btn=document.getElementById("craving-start-btn");
+  arc.style.strokeDashoffset=340-(pct/100)*340;
+  arc.style.stroke=done?"#00e544":"#ff4444";
+  arc.style.filter=`drop-shadow(0 0 8px ${done?"#00e544":"#ff4444"})`;
+  timeEl.textContent=`${mm}:${ss}`;
+  timeEl.style.color=done?"#00e544":"#fff";
+  msgEl.textContent=done?"💪 TU JINKLAS! Craving geli!":'"10 min pass zale ki safe aahe"';
+  msgEl.style.color=done?"#00e544":"#ffffff55";
+  if(!done) btn.textContent=cravingRunning?"PAUSE":(cravingSec<600?"RESUME":"START");
+}
+
+// ── RELAPSE ──
+function openRelapse(){ document.getElementById("relapse-modal").classList.add("show"); }
+function closeRelapse(){ document.getElementById("relapse-modal").classList.remove("show"); }
+function markRelapse(){
+  const today=todayISO();
+  store.days[today]={completed:[],relapsed:true};
+  saveStore(); closeRelapse(); flash("Reset zala. Udya fresh start 💪"); render();
+}
+
+// ── MILESTONE ──
+let lastStreak=null;
+function checkMilestone(streak){
+  if(lastStreak===null){lastStreak=streak;return;}
+  if(streak!==lastStreak){
+    const ms=MILESTONES.find(m=>m.day===streak);
+    if(ms) showMilestone(ms);
+    lastStreak=streak;
+  }
+}
+function showMilestone(ms){
+  document.getElementById("ms-icon").textContent=ms.icon;
+  document.getElementById("ms-label").textContent=ms.label;
+  document.getElementById("ms-reward").textContent=ms.reward;
+  document.getElementById("milestone-modal").classList.add("show");
+}
+function closeMilestone(){ document.getElementById("milestone-modal").classList.remove("show"); }
+
+// ── TOGGLE HABIT ──
+function toggleHabit(id){
+  const today=todayISO();
+  const dd=todayData();
+  if(dd.relapsed){flash("Relapse aahe — udya try kar 💪");return;}
+  const hab=allHabits().find(h=>h.id===id);
+  if(!hab) return;
+  const completed=dd.completed||[];
+  const wasDone=completed.includes(id);
+  const newCompleted=wasDone?completed.filter(x=>x!==id):[...completed,id];
+  store.days[today]={...dd,completed:newCompleted};
+  let xpDelta=wasDone?-hab.xp:hab.xp;
+  store.totalXP=Math.max(0,store.totalXP+xpDelta);
+  if(!wasDone&&newCompleted.length===allHabits().length){
+    store.totalXP+=FULL_DAY_BONUS;
+    setTimeout(()=>flash(`🏆 FULL DAY! +${FULL_DAY_BONUS} BONUS XP!`),400);
+  } else if(!wasDone){
+    flash(`+${hab.xp} XP 🔥`);
+  }
+  saveStore(); render();
+}
+
+// ── MONEY ──
+function setMoneyType(type){
+  moneyType=type;
+  document.getElementById("seg-save").className="seg-btn"+(type==="save"?" active-save":"");
+  document.getElementById("seg-kharch").className="seg-btn"+(type==="kharch"?" active-kharch":"");
+  document.getElementById("money-input").placeholder=type==="save"?"₹ Kiti save kele?":"₹ Kiti kharch kele?";
+  document.getElementById("money-input").style.borderColor=type==="save"?"#00e54444":"#ff444444";
+  document.getElementById("money-add-btn").style.background=type==="save"?"#00e54422":"#ff444422";
+  document.getElementById("money-add-btn").style.border=`2px solid ${type==="save"?"#00e54466":"#ff444466"}`;
+  document.getElementById("money-add-btn").style.color=type==="save"?"#00e544":"#ff4444";
+}
+function addMoney(){
+  const val=parseFloat(document.getElementById("money-input").value);
+  if(isNaN(val)||val<=0){flash("Valid amount enter kar");return;}
+  store.moneySavings=[...(store.moneySavings||[]),{date:todayISO(),amount:val,type:moneyType}];
+  document.getElementById("money-input").value="";
+  saveStore();
+  flash(moneyType==="save"?`💰 ₹${val} saved!`:`🛒 ₹${val} kharch mark zala`);
+  render();
+}
+
+// ── CUSTOM HABITS ──
+function addCustomHabit(){
+  const name=document.getElementById("habit-input").value.trim();
+  if(!name){flash("Habit naam lihih");return;}
+  if((store.customHabits||[]).length>=5){flash("Max 5 custom habits");return;}
+  store.customHabits=[...(store.customHabits||[]),{id:`custom_${Date.now()}`,name,icon:"⭐"}];
+  document.getElementById("habit-input").value="";
+  saveStore(); flash(`✅ "${name}" add zala!`); render();
+}
+function removeCustomHabit(id){
+  store.customHabits=(store.customHabits||[]).filter(h=>h.id!==id);
+  Object.keys(store.days).forEach(date=>{
+    if(store.days[date].completed) store.days[date].completed=store.days[date].completed.filter(c=>c!==id);
+  });
+  saveStore(); flash("Habit remove zali"); render();
+}
+
+// ── TAB SWITCH ──
+function switchTab(tab){
+  currentTab=tab;
+  ["today","money","stats","settings"].forEach(t=>{
+    document.getElementById(`content-${t}`).style.display=t===tab?"block":"none";
+    document.getElementById(`tab-${t}`).classList.toggle("active",t===tab);
+    document.getElementById(`nav-${t}`).classList.toggle("active",t===tab);
+  });
+  render();
+}
+
+// ── RENDER ──
+function render(){
+  const today=todayISO();
+  const dayNum=dayNumber(today);
+  const dd=todayData();
+  const completed=new Set(dd.completed||[]);
+  const streak=calcStreak();
+  const level=getLevel(store.totalXP);
+  const lvlPct=getLvlPct(store.totalXP);
+  const isRelapsed=dd.relapsed;
+  const isClean=completed.has("no_weed")&&completed.has("no_alcohol")&&!isRelapsed;
+  const habits=allHabits();
+  const todayPct=Math.round((completed.size/habits.length)*100);
+  const challengePct=Math.round((dayNum/TOTAL_DAYS)*100);
+  const quote=QUOTES[dayNum%QUOTES.length];
+
+  // Money
+  const entries=store.moneySavings||[];
+  const totalSaved=entries.filter(e=>e.type!=="kharch").reduce((a,e)=>a+e.amount,0);
+  const totalKharch=entries.filter(e=>e.type==="kharch").reduce((a,e)=>a+e.amount,0);
+  const netSaved=totalSaved-totalKharch;
+  const moneyPct=Math.min(100,Math.max(0,Math.round((netSaved/MONEY_GOAL)*100)));
+  const thisMonth=thisMonthISO();
+  const monthSaved=entries.filter(e=>e.date.startsWith(thisMonth)&&e.type!=="kharch").reduce((a,e)=>a+e.amount,0);
+  const monthKharch=entries.filter(e=>e.date.startsWith(thisMonth)&&e.type==="kharch").reduce((a,e)=>a+e.amount,0);
+
+  // Update header
+  document.getElementById("day-num").textContent=dayNum;
+  document.getElementById("challenge-pct-txt").textContent=challengePct+"%";
+  document.getElementById("challenge-bar").style.width=challengePct+"%";
+  document.getElementById("lvl-badge").textContent=level.badge;
+  document.getElementById("lvl-name").textContent=level.name;
+  document.getElementById("lvl-name").style.color=level.color;
+  document.getElementById("xp-total").textContent=store.totalXP+" XP";
+  document.getElementById("xp-bar").style.width=lvlPct+"%";
+  document.getElementById("xp-bar").style.background=`linear-gradient(90deg,${level.color},#ffd700)`;
+  document.getElementById("xp-pct-txt").textContent=lvlPct+"% to next level";
+
+  checkMilestone(streak);
+
+  // ── TODAY TAB ──
+  if(currentTab==="today"){
+    // Clean status
+    let statusHtml;
+    if(isRelapsed){
+      statusHtml=`<div style="background:#ff444414;border:2px solid #ff444444;border-radius:18px;padding:16px 18px;text-align:center">
+        <div style="font-size:32px">😔</div>
+        <div style="color:#ff4444;font-weight:900;font-size:15px;font-family:'Orbitron',monospace;margin-top:4px">AAJ RELAPSE ZALA</div>
+        <div style="color:#ffffff66;font-size:13px;margin-top:4px">Udya fresh start 💪</div>
+      </div>`;
+    } else if(isClean){
+      statusHtml=`<div style="background:linear-gradient(135deg,#0d2a0d,#0a2020);border:2px solid #00e5ff44;border-radius:18px;padding:16px 18px;text-align:center;box-shadow:0 0 20px #00e5ff0a">
+        <div style="font-size:34px">✅</div>
+        <div style="color:#00e5ff;font-weight:900;font-size:16px;font-family:'Orbitron',monospace;margin-top:4px">AAJ CLEAN! 🔥</div>
+        <div style="color:#ffffff77;font-size:13px;margin-top:4px">${streak} din sober 💪</div>
+      </div>`;
+    } else {
+      statusHtml=`<div style="background:#ffffff07;border:2px dashed #ffffff18;border-radius:18px;padding:16px 18px;text-align:center">
+        <div style="font-size:32px">⏳</div>
+        <div style="color:#ffd700;font-weight:900;font-size:15px;font-family:'Orbitron',monospace;margin-top:4px">AAJ MARK KAR</div>
+        <div style="color:#ffffff44;font-size:13px;margin-top:4px">"${quote}"</div>
+      </div>`;
+    }
+
+    // Habits grouped
+    const grouped={};
+    habits.forEach(h=>{ if(!grouped[h.cat]) grouped[h.cat]=[]; grouped[h.cat].push(h); });
+    let habitsHtml="";
+    for(const [cat,list] of Object.entries(grouped)){
+      const catInfo=CATS[cat]||{label:cat,color:"#fff"};
+      habitsHtml+=`<div style="padding:0 14px;margin-bottom:12px">
+        <div style="color:${catInfo.color};font-size:10px;letter-spacing:3px;font-family:'Orbitron',monospace;margin-bottom:8px;padding-left:2px">${catInfo.label}</div>
+        <div>`;
+      for(const h of list){
+        const done=completed.has(h.id);
+        const opacity=isRelapsed?0.4:1;
+        habitsHtml+=`<div class="hrow habit-row${done?" done":""}" style="--cat-color:${catInfo.color};opacity:${opacity}" onclick="toggleHabit('${h.id}')">
+          <div style="font-size:22px;min-width:28px;text-align:center">${h.icon}</div>
+          <div style="flex:1">
+            <div style="color:${done?"#fff":"#ffffff88"};font-weight:700;font-size:15px">${h.name}</div>
+            <div style="color:${done?catInfo.color:"#ffffff33"};font-size:11px;font-family:'Orbitron',monospace">+${h.xp} XP</div>
+          </div>
+          <div class="chk" style="${done?`background:${catInfo.color};box-shadow:0 0 10px ${catInfo.color}55;border:none`:""}">${done?"✓":""}</div>
+          ${h.cat==="custom"?`<div onclick="event.stopPropagation();removeCustomHabit('${h.id}')" style="width:24px;height:24px;border-radius:8px;background:#ff444422;border:1px solid #ff444444;display:flex;align-items:center;justify-content:center;color:#ff4444;font-size:12px;cursor:pointer;margin-left:-4px;flex-shrink:0">✕</div>`:""}
+        </div>`;
+      }
+      habitsHtml+=`</div></div>`;
+    }
+
+    document.getElementById("content-today").innerHTML=`
+      <div style="padding:0 14px;margin-bottom:10px">${statusHtml}</div>
+      <div style="margin:0 14px 10px;background:#ffffff07;border-radius:14px;padding:10px 14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+          <span style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace">AAJ PROGRESS</span>
+          <span style="color:#ffd700;font-weight:800;font-size:11px;font-family:'Orbitron',monospace">${completed.size}/${habits.length} — ${todayPct}%</span>
+        </div>
+        <div class="bar-track" style="height:6px"><div class="bar-fill" style="width:${todayPct}%;height:6px;background:linear-gradient(90deg,#ffd700,#ff8c00)"></div></div>
+      </div>
+      <div style="display:flex;gap:10px;padding:0 14px;margin-bottom:12px">
+        <button class="btn" onclick="openCraving()" style="flex:1;padding:13px 8px;border-radius:14px;background:#ff8c0018;border:2px solid #ff8c0044;color:#ff8c00;font-weight:800;font-size:13px;font-family:'Orbitron',monospace;line-height:1.4">⏱️<br/>CRAVING</button>
+        <button class="btn" onclick="openRelapse()" style="flex:1;padding:13px 8px;border-radius:14px;background:#ff444412;border:2px solid #ff444430;color:#ff4444;font-weight:800;font-size:13px;font-family:'Orbitron',monospace;line-height:1.4">😔<br/>RELAPSE</button>
+        <div style="flex:1;background:#ffffff08;border:1px solid #ffffff12;border-radius:14px;padding:13px 8px;text-align:center">
+          <div style="color:#ff4444;font-size:24px;font-weight:900;font-family:'Orbitron',monospace;line-height:1">${streak}</div>
+          <div style="color:#ffffff44;font-size:10px;margin-top:3px;font-family:'Orbitron',monospace">DIN STREAK</div>
+        </div>
+      </div>
+      ${habitsHtml}
+    `;
+  }
+
+  // ── MONEY TAB ──
+  if(currentTab==="money"){
+    const netColor=netSaved>=0?"#00e544":"#ff4444";
+    const recentLog=[...entries].reverse().slice(0,12).map(e=>`
+      <div style="background:#ffffff07;border:1px solid #ffffff0d;border-radius:12px;padding:11px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="color:#ffffff55;font-size:11px">${e.date}</div>
+          <div style="color:#ffffff77;font-size:12px;font-weight:600">${e.type==="kharch"?"🛒 Kharch":"💰 Save"}</div>
+        </div>
+        <span style="color:${e.type==="kharch"?"#ff4444":"#00e544"};font-weight:800;font-size:15px;font-family:'Orbitron',monospace">${e.type==="kharch"?"-":"+"}₹${e.amount}</span>
+      </div>`).join("") || `<div style="color:#ffffff33;font-size:13px;text-align:center;padding:20px">Abhi kahi entry nahi 🙂</div>`;
+
+    document.getElementById("content-money").innerHTML=`
+      <div style="padding:0 14px">
+        <!-- NET SAVINGS CARD -->
+        <div style="background:linear-gradient(135deg,#0a2010,#0d1a0a);border:2px solid #00e54444;border-radius:20px;padding:20px 18px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <div>
+              <div style="color:#ffffff44;font-size:9px;letter-spacing:3px;font-family:'Orbitron',monospace;margin-bottom:4px">NET SAVINGS</div>
+              <div style="color:${netColor};font-size:38px;font-weight:900;font-family:'Orbitron',monospace;text-shadow:0 0 16px ${netColor}66">₹${Math.abs(netSaved).toFixed(0)}</div>
+              ${netSaved<0?`<div style="color:#ff4444;font-size:11px;font-family:'Orbitron',monospace">KHARCH JAST!</div>`:""}
+            </div>
+            <div style="text-align:right">
+              <div style="color:#ffffff44;font-size:9px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:4px">GOAL</div>
+              <div style="color:#ffffff66;font-size:18px;font-weight:800;font-family:'Orbitron',monospace">₹${MONEY_GOAL}</div>
+            </div>
+          </div>
+          <div class="bar-track" style="height:8px;margin-bottom:6px"><div class="bar-fill" style="width:${moneyPct}%;height:8px;background:linear-gradient(90deg,#00e544,#00e5ff)"></div></div>
+          <div style="color:#00e544;font-weight:800;font-size:11px;font-family:'Orbitron',monospace">${moneyPct}% goal complete</div>
+        </div>
+
+        <!-- SAVE vs KHARCH SUMMARY -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="background:#00e54410;border:1.5px solid #00e54433;border-radius:16px;padding:14px;text-align:center">
+            <div style="color:#ffffff44;font-size:9px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:4px">TOTAL SAVED</div>
+            <div style="color:#00e544;font-size:22px;font-weight:900;font-family:'Orbitron',monospace">₹${totalSaved.toFixed(0)}</div>
+            <div style="color:#ffffff33;font-size:10px;margin-top:3px">Is mahina: ₹${monthSaved.toFixed(0)}</div>
+          </div>
+          <div style="background:#ff444410;border:1.5px solid #ff444433;border-radius:16px;padding:14px;text-align:center">
+            <div style="color:#ffffff44;font-size:9px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:4px">KHARCH ZALA</div>
+            <div style="color:#ff4444;font-size:22px;font-weight:900;font-family:'Orbitron',monospace">₹${totalKharch.toFixed(0)}</div>
+            <div style="color:#ffffff33;font-size:10px;margin-top:3px">Is mahina: ₹${monthKharch.toFixed(0)}</div>
+          </div>
+        </div>
+
+        <!-- ADD ENTRY -->
+        <div style="background:#ffffff08;border:1px solid #ffffff12;border-radius:16px;padding:16px;margin-bottom:10px">
+          <div class="seg-wrap">
+            <button id="seg-save" class="seg-btn active-save" onclick="setMoneyType('save')">💰 SAVE</button>
+            <button id="seg-kharch" class="seg-btn" onclick="setMoneyType('kharch')">🛒 KHARCH</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <input id="money-input" type="number" placeholder="₹ Kiti save kele?"
+              onkeydown="if(event.key==='Enter')addMoney()"
+              style="flex:1;padding:12px 14px;border-radius:12px;background:#ffffff0d;border:1px solid #00e54444;color:#fff;font-size:15px"/>
+            <button id="money-add-btn" class="btn" onclick="addMoney()"
+              style="padding:12px 18px;border-radius:12px;font-weight:800;font-size:14px;background:#00e54422;border:2px solid #00e54466;color:#00e544">ADD</button>
+          </div>
+        </div>
+
+        <div style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:8px">RECENT ENTRIES</div>
+        ${recentLog}
+      </div>
+    `;
+    // restore moneyType UI
+    setMoneyType(moneyType);
+  }
+
+  // ── STATS TAB ──
+  if(currentTab==="stats"){
+    const earnedMS=[...MILESTONES].reverse().find(m=>m.day<=streak);
+    const nextMS=MILESTONES.find(m=>m.day>streak);
+    const statsGrid=[
+      {label:"STREAK",val:`${streak} din`,color:"#ff4444",icon:"🔥"},
+      {label:"TOTAL XP",val:`${store.totalXP}`,color:"#ffd700",icon:"⚡"},
+      {label:"LEVEL",val:level.name,color:level.color,icon:level.badge},
+      {label:"CHALLENGE",val:`${challengePct}%`,color:"#00e5ff",icon:"📊"},
+      {label:"AAJ HABITS",val:`${completed.size}/${habits.length}`,color:"#ff8c00",icon:"✅"},
+      {label:"NET SAVED",val:`₹${netSaved.toFixed(0)}`,color:netSaved>=0?"#00e544":"#ff4444",icon:"💰"},
+    ].map(x=>`<div style="background:#ffffff08;border:1px solid #ffffff10;border-radius:16px;padding:16px 14px;text-align:center">
+      <div style="font-size:24px;margin-bottom:4px">${x.icon}</div>
+      <div style="color:${x.color};font-size:18px;font-weight:900;font-family:'Orbitron',monospace">${x.val}</div>
+      <div style="color:#ffffff33;font-size:9px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-top:3px">${x.label}</div>
+    </div>`).join("");
+
+    const msHtml=MILESTONES.map(ms=>{
+      const unlocked=streak>=ms.day;
+      return `<div style="background:${unlocked?"#ffd70010":"#ffffff06"};border:1.5px solid ${unlocked?"#ffd70044":"#ffffff0d"};border-radius:14px;padding:13px 16px;margin-bottom:7px;display:flex;align-items:center;gap:12px;opacity:${unlocked?1:0.5}">
+        <div style="font-size:24px">${unlocked?ms.icon:"🔒"}</div>
+        <div style="flex:1">
+          <div style="color:${unlocked?"#ffd700":"#ffffff44"};font-weight:700;font-size:14px">${ms.label}</div>
+          <div style="color:#ffffff33;font-size:11px;font-family:'Orbitron',monospace">Day ${ms.day}</div>
+        </div>
+        ${unlocked?`<div style="color:#ffd700;font-size:16px">✓</div>`:""}
+      </div>`;
+    }).join("");
+
+    document.getElementById("content-stats").innerHTML=`
+      <div style="padding:0 14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">${statsGrid}</div>
+        <div style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:8px">MILESTONES</div>
+        ${msHtml}
+      </div>`;
+  }
+
+  // ── SETTINGS TAB ──
+  if(currentTab==="settings"){
+    const streak=calcStreak();
+    const earnedMS=[...MILESTONES].reverse().find(m=>m.day<=streak);
+    const nextMS=MILESTONES.find(m=>m.day>streak);
+    const quote=QUOTES[dayNumber(todayISO())%QUOTES.length];
+
+    const customList=(store.customHabits||[]).length===0
+      ?`<div style="color:#ffffff33;font-size:12px;text-align:center;padding:8px">Abhi kahi custom habit nahi</div>`
+      :(store.customHabits||[]).map(h=>`
+        <div style="background:#ffd70010;border:1px solid #ffd70033;border-radius:12px;padding:11px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">⭐</span>
+          <span style="flex:1;color:#ffd700;font-weight:700;font-size:14px">${h.name}</span>
+          <button class="btn" onclick="removeCustomHabit('${h.id}')" style="padding:5px 10px;border-radius:8px;background:#ff444422;border:1px solid #ff444444;color:#ff4444;font-weight:700;font-size:12px">REMOVE</button>
+        </div>`).join("");
+
+    const levelsHtml=LEVELS.map(l=>{
+      const reached=store.totalXP>=l.min;
+      return `<div style="background:${reached?l.color+"10":"#ffffff06"};border:1px solid ${reached?l.color+"44":"#ffffff0d"};border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;opacity:${reached?1:0.45}">
+        <span style="font-size:20px">${l.badge}</span>
+        <div style="flex:1">
+          <div style="color:${reached?l.color:"#ffffff44"};font-weight:800;font-size:14px;font-family:'Orbitron',monospace">${l.name}</div>
+          <div style="color:#ffffff33;font-size:11px">${l.desc} • ${l.min} XP</div>
+        </div>
+        ${reached?`<div style="color:${l.color};font-size:14px">✓</div>`:""}
+      </div>`;
+    }).join("");
+
+    document.getElementById("content-settings").innerHTML=`
+      <div style="padding:0 14px">
+        <div style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:8px">⭐ CUSTOM HABITS ADD KAR</div>
+        <div style="background:#ffffff08;border:1px solid #ffffff12;border-radius:16px;padding:16px;margin-bottom:14px">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input id="habit-input" placeholder="Habit naam lihih..."
+              onkeydown="if(event.key==='Enter')addCustomHabit()"
+              style="flex:1;padding:12px 14px;border-radius:12px;background:#ffffff0d;border:1px solid #ffffff22;color:#fff;font-size:14px"/>
+            <button class="btn" onclick="addCustomHabit()" style="padding:12px 16px;border-radius:12px;background:#ffd70022;border:2px solid #ffd70066;color:#ffd700;font-weight:800;font-size:13px">ADD</button>
+          </div>
+          ${customList}
+        </div>
+
+        <div style="background:#ffffff07;border:1px dashed #ffffff18;border-radius:16px;padding:18px 16px;margin-bottom:14px;text-align:center">
+          <div style="color:#ffffff33;font-size:9px;letter-spacing:3px;font-family:'Orbitron',monospace;margin-bottom:8px">AAJ CHA QUOTE</div>
+          <div style="color:#ffffff88;font-size:14px;line-height:1.7;font-style:italic">"${quote}"</div>
+        </div>
+
+        <div style="background:#ffffff08;border:1px solid #ffffff10;border-radius:16px;padding:16px;margin-bottom:14px">
+          <div style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:10px">STREAK INFO</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="color:#ffffff77;font-size:14px">Current Streak</span>
+            <span style="color:#ff4444;font-weight:900;font-size:18px;font-family:'Orbitron',monospace">${streak} 🔥</span>
+          </div>
+          ${earnedMS?`<div style="color:#ffd700;font-size:13px;font-weight:700">Last: ${earnedMS.icon} ${earnedMS.label}</div>`:""}
+          ${nextMS?`<div style="color:#ffffff44;font-size:12px;margin-top:4px">Next: Day ${nextMS.day} — ${nextMS.label} (${nextMS.day-streak} din baaki)</div>`:""}
+        </div>
+
+        <div style="color:#ffffff44;font-size:10px;letter-spacing:2px;font-family:'Orbitron',monospace;margin-bottom:8px">LEVELS</div>
+        ${levelsHtml}
+      </div>`;
+  }
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
